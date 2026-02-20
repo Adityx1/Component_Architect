@@ -1,0 +1,35 @@
+{
+  "name": "guided-component-architect",
+  "version": "1.0.0",
+  "description": "Agentic Angular component generator with design system validation and self-correction loop",
+  "scripts": {
+    "start": "python src/pipeline.py",
+    "session": "python src/session.py",
+    "test": "pytest tests/ -v",
+    "test:watch": "pytest tests/ -v --tb=short -f",
+    "lint": "pylint src/",
+    "preview": "node preview/server.js"
+  },
+  "keywords": [
+    "angular",
+    "component-generator",
+    "llm",
+    "agentic",
+    "design-system",
+    "code-generation",
+    "groq",
+    "kimi-k2"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@angular/core": "^17.0.0",
+    "@angular/material": "^17.0.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.10.0"
+  }
+}
