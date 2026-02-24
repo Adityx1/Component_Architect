@@ -9,6 +9,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+!app.py
 
 # IDEs
 .vscode/
@@ -17,6 +18,3 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
-
-# Documentation / Approach
-APPROACH.md
