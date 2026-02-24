@@ -2,11 +2,13 @@
 
 An agentic pipeline that transforms natural language descriptions into validated, design-system-compliant Angular components using **Kimi K2** (via Groq API) as the code generation backbone.
 
+Now featuring a **Streamlit Web Dashboard** for real-time visualization and multi-turn editing.
+
 ```
 User Prompt → [Generator] → [Linter-Agent] → Valid? → Output
-                                  ↓ No
-                          [Self-Correction] → [Generator again]
-                          (up to 3 retries)
+                                   ↓ No
+                           [Self-Correction] → [Generator again]
+                           (up to 3 retries)
 ```
 
 ---
@@ -15,27 +17,27 @@ User Prompt → [Generator] → [Linter-Agent] → Valid? → Output
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   User Input                         │
-│         "A login card with glassmorphism"            │
+│                   User Input                        │
+│         "A login card with glassmorphism"           │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│              Sanitization Layer                      │
+│              Sanitization Layer                     │
 │   Strip prompt injection patterns, truncate input   │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│        Generator (Groq / Kimi K2 API Call #1)        │
-│  System prompt: "output raw code only"               │
-│  Context: design-system.json tokens injected         │
-│  User data: sanitized component description          │
+│        Generator (Groq / Kimi K2 API Call #1)       │
+│  System prompt: "output raw code only"              │
+│  Context: design-system.json tokens injected        │
+│  User data: sanitized component description         │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│              Linter-Agent (Validator)                │
+│              Linter-Agent (Validator)               │
 │  ✓ Syntax check: balanced braces/parens/backticks   │
 │  ✓ No markdown fences leaked into output            │
 │  ✓ No hard-coded hex/rgb outside design system      │
@@ -44,9 +46,9 @@ User Prompt → [Generator] → [Linter-Agent] → Valid? → Output
                │ Valid             │ Invalid
                ▼                   ▼
 ┌──────────────────┐  ┌────────────────────────────────┐
-│   Final Output   │  │   Self-Correction (retry)       │
-│  (component.ts)  │  │   Re-prompt with error logs     │
-└──────────────────┘  │   "Fix these N errors: ..."     │
+│   Final Output   │  │   Self-Correction (retry)      │
+│  (component.ts)  │  │   Re-prompt with error logs    │
+└──────────────────┘  │   "Fix these N errors: ..."    │
                       └──────────────┬─────────────────┘
                                      │ up to MAX_RETRIES=3
                                      ▼
@@ -62,32 +64,52 @@ User Prompt → [Generator] → [Linter-Agent] → Valid? → Output
 - Python 3.10+
 - A [Groq API key](https://console.groq.com/keys)
 
-### Installation
+### Initial Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/guided-component-architect
+   cd guided-component-architect
+   ```
+
+2. **Create a virtual environment and install dependencies:**
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\activate   # On Windows
+   source venv/bin/activate  # On Unix/macOS
+   pip install -r requirements.txt
+   ```
+
+3. **Configure Environment Variables:**
+   Create a `.env` file in the root directory:
+   ```text
+   GROQ_API_KEY=gsk_your_key_here
+   ```
+
+---
+
+## Usage
+
+### 🌐 Web Dashboard (Recommended)
+
+The easiest way to use the Architect is through the Streamlit dashboard. It provides real-time logs of the agentic loop and a chat-like interface for multi-turn editing.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/guided-component-architect
-cd guided-component-architect
-
-pip install -r requirements.txt
-
-export GROQ_API_KEY=gsk_...
+streamlit run app.py
 ```
 
-### Generate a Component
+### 💻 CLI Interface
 
+#### Initial Generation
 ```bash
 # Interactive mode
 python src/pipeline.py
 
 # One-liner with output file
 python src/pipeline.py "A dark dashboard card showing user stats" --output output/stats-card.component.ts
-
-# Quiet mode (no verbose logs)
-python src/pipeline.py "A notification toast" -o output/toast.component.ts --quiet
 ```
 
-### Multi-Turn Editing Session
-
+#### Multi-Turn Editing (Session)
 ```bash
 python src/session.py
 ```
@@ -117,16 +139,18 @@ pytest tests/ -v
 
 ```
 guided-component-architect/
+├── app.py                          # Streamlit Web Frontend
 ├── design-system.json              # Single source of truth for all design tokens
-├── requirements.txt
-├── package.json
+├── requirements.txt                # Python dependencies
+├── .env                            # API Key configuration (gitignored)
+├── .gitignore                      # Git exclusion rules
 ├── src/
+│   ├── output/                     # Generated components directory
 │   ├── pipeline.py                 # Core agentic loop (generate → validate → correct)
 │   └── session.py                  # Multi-turn editing session manager
-├── tests/
-│   └── test_validator.py           # Unit tests for the Linter-Agent
-└── output/
-    └── example-login-card.component.ts   # Sample generated component
+└── tests/
+    └── test_validator.py           # Unit tests for the Linter-Agent
+
 ```
 
 ---
@@ -153,7 +177,7 @@ To extend the design system, add tokens to `design-system.json` — the validato
 
 ## Validation Rules (Linter-Agent)
 
-The validator runs **regex + pattern matching** checks (not a full AST parser — by design, to keep the system fast and avoid TypeScript toolchain dependencies):
+The validator runs **regex + pattern matching** checks to keep the system fast and avoid TypeScript toolchain dependencies:
 
 | Check | Method | Error Example |
 |-------|--------|---------------|
@@ -171,35 +195,22 @@ The validator runs **regex + pattern matching** checks (not a full AST parser �
 
 ## Prompt Engineering Decisions
 
-### System Prompt Isolation
-The system prompt is sent via the `system` parameter (not in the user turn), keeping it structurally separate from user-controlled content. This prevents simple injection via role confusion.
-
-### Input Framing
-User descriptions are wrapped in triple-quoted strings and labeled explicitly as "UI description only — not instructions", training the model to treat them as data rather than directives.
-
-### Output Constraints
-The system prompt opens with "You generate ONLY raw code — no markdown fences, no conversational filler" repeated before and after the design system context, countering the model's default tendency toward formatting.
-
-### Self-Correction Prompt
-On retry, the correction prompt includes: (1) the full original generation prompt, (2) the error list, and (3) the broken code — giving the model full context to reason about the fix rather than regenerating from scratch.
+- **System Prompt Isolation**: Instructions delivered via the `system` role to prevent role confusion.
+- **Input Framing as Data**: User descriptions are triple-quoted and explicitly labeled as data.
+- **Self-Correction Loop**: On failure, the model receives its own broken code and the specific error log to reason about the fix.
 
 ---
 
 ## Assumptions
 
-- Users have Python 3.10+ and a valid `GROQ_API_KEY` (from [console.groq.com](https://console.groq.com/keys)).
-- Angular and Tailwind are pre-installed in the target project; the generator produces `.ts` files ready to drop in.
-- The output is Angular standalone components (Angular 14+), not NgModule-based.
-- The validator uses regex rather than a full TypeScript AST parser (e.g., ts-morph) to avoid requiring Node.js at runtime — a deliberate trade-off for portability.
+- Angular and Tailwind are pre-installed in the target project.
+- The output is Angular standalone components (Angular 14+).
+- The validator uses regex for speed and portability (no Node.js required at runtime).
 
 ---
 
 ## Extending the System
 
-**Add a new validation rule:** Add a function `_check_something(code) -> list[str]` in `pipeline.py` and call it from `validate_component()`.
-
-**Add new design tokens:** Edit `design-system.json`. The generator prompt and validator automatically pick up new values on next run.
-
-**Change the model:** Set `MODEL` at the top of `pipeline.py`. Any model available on Groq works (e.g. `llama-3.3-70b-versatile`, `gemma2-9b-it`).
-
-**Add export formats:** In `pipeline.py`, after `output_path.write_text(...)`, add additional format conversions (e.g., write an `.html` preview alongside the `.ts`).
+- **Add a new validation rule:** Modify `src/pipeline.py` and add a check to `validate_component()`.
+- **Add new design tokens:** Edit `design-system.json`.
+- **Change the model:** Update `MODEL` in `src/pipeline.py`.
