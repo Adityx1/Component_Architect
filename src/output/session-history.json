@@ -1,0 +1,65 @@
+[
+  {
+    "type": "create",
+    "prompt": "login card with glassmorphism effect",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "make the card rounded with glow effedct",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "add password forgot link",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "Inject an authentication service",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "Call an API inside onSubmit()",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "Handle errors",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "Add form validation",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "Add routing after successful login",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  },
+  {
+    "type": "edit",
+    "prompt": "securely handle tokens",
+    "attempts": 1,
+    "valid": true,
+    "errors": []
+  }
+]
